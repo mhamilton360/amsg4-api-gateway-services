@@ -1,0 +1,4 @@
+FROM openjdk:8-jdk-alpine 
+VOLUME /tmp 
+COPY target/amsg4-api-users-0.0.1-SNAPSHOT.jar Amsg4UsersService.jar 
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/Amsg4UsersService.jar"] 
