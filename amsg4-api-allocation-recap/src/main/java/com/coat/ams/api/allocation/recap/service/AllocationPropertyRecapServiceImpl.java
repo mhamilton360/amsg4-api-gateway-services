@@ -62,9 +62,7 @@ public class AllocationPropertyRecapServiceImpl implements AllocationPropertyRec
 	
 	List<AllocationPropertyRecapEntity> getAllocPropertyRecapById(SqlParameterSource paramaters) {
 
-
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
 		dataSource.setDriverClassName("oracle.jdbc.OracleDriver");
 		dataSource.setUrl("jdbc:oracle:thin:@//tlallocdb1.coat.com:1521/dalloc.coat.com");
 		dataSource.setUsername("BAS");
@@ -73,14 +71,32 @@ public class AllocationPropertyRecapServiceImpl implements AllocationPropertyRec
 		jdbcTemplate.setResultsMapCaseInsensitive(true);
 
 		// Convert o_property_cur SYS_REFCURSOR to List<GetAllocPropertyRecap>
-		simpleJdbcCallRefCursor = new SimpleJdbcCall(dataSource).withProcedureName("GET_ALLOC_PROPERTY_RECAP")
+		simpleJdbcCallRefCursor = new SimpleJdbcCall(dataSource)
+				.withProcedureName("GET_ALLOC_PROPERTY_RECAP")
 				.returningResultSet("o_property_cur", BeanPropertyRowMapper.newInstance(AllocationPropertyRecapEntity.class));
-	
+		
 		Map<String, Object> out = simpleJdbcCallRefCursor.execute(paramaters);
-		if (out == null) {
+		
+		List<AllocationPropertyRecapEntity> allocProperty = castList(out.get("out_refcursor"), AllocationPropertyRecapEntity.class);
+		if (allocProperty == null) {
 			return new ArrayList<AllocationPropertyRecapEntity>();
 		} else {
-			return  (List<AllocationPropertyRecapEntity>) out.get("o_property_cur");
+			return  allocProperty;
 		}
+		
+	}
+	
+	public static <T> List<T> castList(Object obj, Class<T> clazz)
+	{
+	    List<T> result = new ArrayList<T>();
+	    if(obj instanceof List<?>)
+	    {
+	        for (Object o : (List<?>) obj)
+	        {
+	            result.add(clazz.cast(o));
+	        }
+	        return result;
+	    }
+	    return null;
 	}
 }
